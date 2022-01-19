@@ -1,1 +1,4 @@
-na
+
+to run application in local host.
+go to cmd : streamlit run "Path of the .py file" (change / to \ and opposite) and hit enter
+p.s change the path of the file in the .py file aswell for it to work.
