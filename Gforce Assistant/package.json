@@ -1,0 +1,30 @@
+{
+  "name": "gforce-assistant",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node ."
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@discordjs/opus": "^0.5.3",
+    "@replit/database": "^2.0.1",
+    "database": "0.0.2",
+    "discord.js": "^13.1.0",
+    "express": "^4.17.1",
+    "ffmpeg": "0.0.4",
+    "ffmpeg-static": "^4.3.0",
+    "fluent-ffmpeg": "^2.1.2",
+    "https": "^1.0.0",
+    "opusscript": "0.0.8",
+    "yt-search": "^2.8.0",
+    "ytdl-core": "^4.9.2"
+  },
+  "devDependencies": {
+    "node": "^16.6.1"
+  },
+  "description": ""
+}
