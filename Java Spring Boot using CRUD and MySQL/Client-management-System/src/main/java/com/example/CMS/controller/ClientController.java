@@ -49,7 +49,7 @@ public class ClientController {
 	@GetMapping("/Clients/edit/{id}")
 	public String editClientForm(@PathVariable Long id,Model model) {
 		model.addAttribute("client",clientService.getClientById(id));
-		return "edit_student";
+		return "edit_Client";
 	}
 	
 	@PostMapping("/Clients/{id}")
