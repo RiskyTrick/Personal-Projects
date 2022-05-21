@@ -1,1 +1,4 @@
 the project contains a Java based Restful web service application , which can be used as a Client/Student/Employee management system.
+
+Run the Application in STS(Spring Tool Suite)
+and open this link in your browser: http://localhost:8080/Clients  to access the web app
