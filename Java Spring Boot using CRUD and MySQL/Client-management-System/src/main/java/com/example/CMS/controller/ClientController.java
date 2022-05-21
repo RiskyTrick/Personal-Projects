@@ -15,6 +15,7 @@ public class ClientController {
 
 	private ClientService clientService;
 
+	// when ever the spring bean has only one constructor then we can avoid using autowired annotation so we have not made use of @Autowired in our project.
 	public ClientController(ClientService clientService) {
 		super();
 		this.clientService = clientService;
