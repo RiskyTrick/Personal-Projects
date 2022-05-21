@@ -14,7 +14,7 @@ public class ClientServiceImpl implements ClientService{
 	private ClientRepository clientRepository;
 	
 	
-	
+	// when ever the spring bean has only one constructor then we can avoid using autowired annotation so we have not made use of @Autowired in our project. same as in controller ;_; .
 	public ClientServiceImpl(ClientRepository clientRepository) {
 		super();
 		this.clientRepository = clientRepository;
