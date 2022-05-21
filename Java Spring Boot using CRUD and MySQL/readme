@@ -2,3 +2,8 @@ the project contains a Java based Restful web service application , which can be
 
 Run the Application in STS(Spring Tool Suite)
 and open this link in your browser: http://localhost:8080/Clients  to access the web app
+
+Note: if you face any errors while running such as some service is Utilising post 8080 use the following in cmd in admin mode.
+//Netstat help.
+netstat -a -o -n  //find and locate the task using port 8080 using ctrl+f 
+taskkill /F /PID <process_id_here> // kill the task using process ID 
