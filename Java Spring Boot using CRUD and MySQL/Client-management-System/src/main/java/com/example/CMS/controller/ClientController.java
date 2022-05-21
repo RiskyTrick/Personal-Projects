@@ -47,7 +47,7 @@ public class ClientController {
 	}
 	
 	@GetMapping("/Clients/edit/{id}")
-	public String editStudentForm(@PathVariable Long id,Model model) {
+	public String editClientForm(@PathVariable Long id,Model model) {
 		model.addAttribute("client",clientService.getClientById(id));
 		return "edit_student";
 	}
