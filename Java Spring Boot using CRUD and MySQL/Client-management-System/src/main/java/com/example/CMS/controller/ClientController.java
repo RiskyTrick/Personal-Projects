@@ -23,7 +23,7 @@ public class ClientController {
 	//handler
 	
 	@GetMapping("/Clients")
-	public String ClientsList(Model model) {
+	public String getClientsList(Model model) {
 		
 		model.addAttribute("Clients", clientService.getAllClients());
 		
@@ -70,6 +70,7 @@ public class ClientController {
 
 		}
 	//handler for delete req
+	//@DeleteMapping("/Clients/{id}")//delete mapping not working in browser.
 	@GetMapping("/Clients/{id}")
 	public String deleteClient(@PathVariable Long id) {
 		clientService.deleteClientById(id);
