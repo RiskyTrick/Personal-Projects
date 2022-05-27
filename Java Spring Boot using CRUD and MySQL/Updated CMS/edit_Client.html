@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="ISO-8859-1">
+<title>Client Management System</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+</head>
+<body>
+<nav class="navbar navbar-expand-md bg-dark navbar-dark">
+  <!-- Brand -->
+  <a class="navbar-brand" href="#">Client Management System</a>
+
+  <!-- Toggler/collapsibe Button -->
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  <!-- Navbar links -->
+  <div class="collapse navbar-collapse" id="collapsibleNavbar">
+    <ul class="navbar-nav">
+      <li class="nav-item">
+        <a class="nav-link" th:href="@{/Clients}">Client List</a>
+      </li>
+    </ul>
+  </div>
+</nav>
+	<div class="container">
+		<div class="row">
+			<div class="col-lg-6 col-md-6 col-cm-6 container justify-content-center card">
+			<h1 class="text-center">Update Client</h1>
+			<div class="card-body">
+			<form th:action="@{/Clients/{id} (id=${client.id})}"th:object="${client}" method="POST">
+				<div class="form-group">
+					<label>Clients First Name</label>
+					<input 
+					type="text"
+					name="firstname"
+					th:field="*{firstname}"
+					class="form-control"
+					placeholder="Enter Clients First name"/>
+				</div>
+				
+					<div class="form-group">
+					<label>Clients Last Name</label>
+					<input 
+					type="text"
+					name="lastname"
+					th:field="*{lastname}"
+					class="form-control"
+					placeholder="Enter Clients last name"/>
+				</div>
+						<div class="form-group">
+					<label>Clients Email Id</label>
+					<input 
+					type="text"
+					name="email"
+					th:field="*{email}"
+					class="form-control"
+					placeholder="Enter Clients Email Id"/>
+				</div>
+					<div class="form-group">
+					<label>Clients Phone Number</label>
+					<input 
+					type="text"
+					name="phone"
+					th:field="*{phone}"
+					class="form-control"
+					placeholder="Enter Clients Phone Number"/>
+				</div>
+				
+				<div class="form-group">
+					<label>Clients Picture (15 MB max) :  </label>
+					<input type="file" name="image" accept="image/png, image/jpeg" class="form-control" multiple>
+				</div>
+				
+				<div class="box-footer">
+				<button type="submit" class"btn btn-primary">Submit</button>
+				</div>
+			</form>
+			</div>
+			</div>
+		</div>
+	</div>
+</body>
+</html>
