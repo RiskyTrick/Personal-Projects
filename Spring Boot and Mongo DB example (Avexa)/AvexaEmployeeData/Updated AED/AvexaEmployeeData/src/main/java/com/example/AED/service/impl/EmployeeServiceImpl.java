@@ -14,10 +14,10 @@ public class EmployeeServiceImpl implements EmployeeService{
 	private EmployeeRepository repository;
 	
 	@Override
-	public Employee saveEmployee(Employee Employee) {
+	public void saveEmployee(Employee Employee) {
 		// TODO Auto-generated method stub
 		repository.save(Employee);
-		return null;
+		
 	}
 
 	@Override
