@@ -12,7 +12,7 @@ public class Main
 		
 		List<Integer> list=new ArrayList<>();
 		
-		LeftView(root.left,1,list); //(i get straight order of the list while traversing so i need to reverse the order hence a list)
+		LeftView(root.left,1,list); //(i get straight order of the tree while traversing so i need to reverse the order hence a list)
 		
 		Collections.reverse(list);//reversing the list
 		
