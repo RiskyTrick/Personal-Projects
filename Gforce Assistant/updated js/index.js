@@ -560,4 +560,4 @@ if(message.content === "!gf leki")
   }
   }
   })
-client.login("ODQxMzg3Mzg1MDY5MzcxNDUy.YJmBEA.SJMul3b8mcTFsoC-V2EbQqJFNok")
+client.login("**TOKEN**")
