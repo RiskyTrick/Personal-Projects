@@ -1,0 +1,429 @@
+PROGRAMMING ASSIGNMENT
+Socket Programming
+
+For This Assignment I have Chosen JAVA Programming language, as I already have experience in socket programming using java in undergrad. 
+
+To reach the objectives of this assignment I have thought it would be ideal to use LINUX as it is convenient. 
+
+Objectives completed: 
+-> There is one Client and 2 Servers
+-> Server 1 is TCP Server and it acts as the interface between Server 2 and Client
+-> Server 2 is UDP Server which is used for the sole purpose of validation of credit card details and relay the information back to TCP server .
+Note this server uses Database component : CcDatabase.txt ( file based)  for validation.
+-> For the whole assignment there had to be 6 different files 
+Client.java
+TCPServer.java
+UDPServer.java
+Login.txt - Has a Set of Login Details informat of USERNAME,PASSWORD
+Items.txt - has a set of items in format of ItemID,ITEM,price
+CcDatabase.txt- has database of creditcards in format of CCNUMBER,CVV
+
+
+ 
+Implemented functions : 
+(BASICALLY WHOLE EXAMPLE SCENARIO)
+Client connects to server1 using TCP
+Server1 prompts for credentials and validates 
+Upon successful authentication, server1 provides item listing to the client.
+Client selects items.
+Server1 generates a receipt and returns it to the client.
+Client sends encrypted credit card details to server1.
+Server1 forwards the encrypted details to server2 using UDP.
+Server2 validates the credit card information and notifies server1.
+Server1 confirms payment to the client.
+
+How To Execute The Code: 
+
+1) Compile all the java files using javac Filename.java
+2)Compile each individual file in individual terminals to demonstrate server and client 
+3)Post compilation use java filename to run the code 
+4)Once its running give inputs to client as directed 
+
+
+
+Contents of text files: 
+
+ 
+
+
+
+Output Screenshots :
+
+For valid input:
+
+
+For Invalid Login Details:
+
+
+For Invalid Credit Card Details: 
+
+
+SOURCE CODES: 
+
+FOR Client.java: 
+
+import java.io.*;
+import java.net.*;
+import java.util.*;
+
+public class Client {
+    private static final String SERVER_HOST = "localhost";
+    private static final int SERVER_PORT = 9876;
+
+    public static void main(String[] args) {
+        try (Socket socket = new Socket(SERVER_HOST, SERVER_PORT);
+             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+             PrintWriter out = new PrintWriter(socket.getOutputStream(), true)) {
+
+            BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+
+            System.out.print("Enter ID: ");
+            String id = reader.readLine();
+            System.out.print("Enter password: ");
+            String password = reader.readLine();
+
+            out.println(id);
+            out.println(password);
+
+            String response = in.readLine();
+            System.out.println(response);
+
+            if (response.equals("Authentication successful")) {
+                System.out.println("List of items:");
+                String line;
+                while (!(line = in.readLine()).isEmpty()) {
+                    System.out.println(line);
+                }
+
+                System.out.println("Please enter the IDs of the items you want to select (one per line, end with an empty line):");
+                List<String> selectedItems = new ArrayList<>();
+                String item;
+                while (!(item = reader.readLine()).isEmpty()) {
+                    selectedItems.add(item);
+                }
+                out.println(String.join(" ", selectedItems));
+                  
+              String receiptLine = in.readLine();
+                System.out.println(receiptLine);
+                while (!(receiptLine = in.readLine()).isEmpty()) {
+                    System.out.println(receiptLine);
+                }
+
+                System.out.print("\nEnter your credit card details:\nCard number (16 digits): ");
+                String cardNumber = reader.readLine();
+                System.out.print("CVV (3 digits): ");
+                String cvv = reader.readLine();
+
+                System.out.print("Enter Caesar cipher key (number): ");
+                int key = Integer.parseInt(reader.readLine().trim());
+
+                String encryptedCardNumber = encrypt(cardNumber, key);
+                String encryptedCVV = encrypt(cvv, key);
+
+                out.println(encryptedCardNumber);
+                out.println(encryptedCVV);
+                out.println(key);
+                
+                String paymentResponse = in.readLine();
+                System.out.println(paymentResponse);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static String encrypt(String input, int key) {
+        StringBuilder encrypted = new StringBuilder();
+        for (char ch : input.toCharArray()) {
+            if (Character.isDigit(ch)) {
+                int originalNum = ch - '0';
+                int encryptedNum = (originalNum + key) % 10;
+                encrypted.append((char) ('0' + encryptedNum));
+            }
+        }
+        return encrypted.toString();
+    }
+}
+
+
+FOR TCPServer.java :
+
+import java.io.*;
+import java.net.*;
+import java.util.*;
+
+public class TCPServer {
+    private static final int SERVER_PORT = 9876;
+    private static final String LOGIN_FILE = "login.txt";
+    private static final String ITEMS_FILE = "items.txt";
+    private static final String UDP_SERVER_HOST = "localhost";
+    private static final int UDP_SERVER_PORT = 9999;
+
+    public static void main(String[] args) {
+        try (ServerSocket serverSocket = new ServerSocket(SERVER_PORT)) {
+            System.out.println("Server is running on port " + SERVER_PORT);
+            while (true) {
+                Socket clientSocket = serverSocket.accept();
+                System.out.println("Accepted connection from client: " + clientSocket.getInetAddress());
+                new Thread(() -> handleClient(clientSocket)).start();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void handleClient(Socket clientSocket) {
+        try (BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+             PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true)) {
+
+            String id = in.readLine().trim();
+            String password = in.readLine().trim();
+            System.out.println("Received ID and password from client: ID=" + id + ", Password=" + password);
+
+            if (authenticateUser(id, password)) {
+                out.println("Authentication successful");
+                System.out.println("Authentication successful for ID: " + id);
+
+                List<String> items = loadItems();
+                System.out.println("Loaded items for client.");
+                for (String item : items) {
+                    out.println(item);
+                }
+                out.println();
+
+                String selectedItemsString = in.readLine().trim();
+                System.out.println("Received selected items from client: " + selectedItemsString);
+                List<String> selectedItems = Arrays.asList(selectedItemsString.split(" "));
+
+                String receipt = generateReceipt(selectedItems);
+                out.println("Receipt:");
+                out.println(receipt);
+                System.out.println("Sent receipt to client:\n" + receipt);
+
+                out.println("Enter your credit card details:");
+                String encryptedCardNumber = in.readLine().trim();
+                String encryptedCVV = in.readLine().trim();
+                System.out.println("Received encrypted credit card details from client.");
+
+                int key = Integer.parseInt(in.readLine().trim());
+                boolean paymentSuccessful = sendCreditCardDetailsToUDPServer(encryptedCardNumber, encryptedCVV, key);
+
+                if (paymentSuccessful) {
+                    out.println("Payment successful");
+                    System.out.println("Payment successful for client.");
+                } else {
+                    out.println("Payment denied");
+                    System.out.println("Payment denied for client.");
+                }
+
+            } else {
+                out.println("Authentication failed");
+                System.out.println("Authentication failed for ID: " + id);
+            }
+
+            clientSocket.close();
+            System.out.println("Closed client connection: " + clientSocket.getInetAddress());
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static boolean authenticateUser(String id, String password) {
+        try (BufferedReader br = new BufferedReader(new FileReader(LOGIN_FILE))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] parts = line.split(",");
+                if (parts.length != 2) continue;
+                String fileId = parts[0].trim();
+                String filePassword = parts[1].trim();
+                if (fileId.equals(id) && filePassword.equals(password)) {
+                    return true;
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    private static List<String> loadItems() {
+        List<String> items = new ArrayList<>();
+        try (BufferedReader br = new BufferedReader(new FileReader(ITEMS_FILE))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                items.add(line);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return items;
+    }
+
+    private static String generateReceipt(List<String> selectedItems) {
+        List<String> items = loadItems();
+        Map<String, String> itemMap = new HashMap<>();
+        Map<String, Double> priceMap = new HashMap<>();
+
+        for (String line : items) {
+            String[] parts = line.split(",");
+            if (parts.length < 3) continue;
+            String itemId = parts[0].trim();
+            String itemName = parts[1].trim();
+            double price = Double.parseDouble(parts[2].trim());
+            itemMap.put(itemId, itemName);
+            priceMap.put(itemId, price);
+        }
+
+        StringBuilder receipt = new StringBuilder();
+        double totalCost = 0;
+        for (String itemId : selectedItems) {
+            String itemName = itemMap.get(itemId);
+            Double price = priceMap.get(itemId);
+
+            if (itemName != null && price != null) {
+                receipt.append(itemName).append(": $").append(String.format("%.2f", price)).append("\n");
+                totalCost += price;
+            } else {
+                receipt.append("Item ID not found: ").append(itemId).append("\n");
+            }
+        }
+
+        receipt.append("\nTotal cost: $").append(String.format("%.2f", totalCost)).append("\n");
+        System.out.println("Generated receipt:\n" + receipt);
+        return receipt.toString();
+    }
+
+    private static boolean sendCreditCardDetailsToUDPServer(String encryptedCardNumber, String encryptedCVV, int key) {
+        try (DatagramSocket udpSocket = new DatagramSocket()) {
+            InetAddress udpServerAddress = InetAddress.getByName(UDP_SERVER_HOST);
+
+            String creditCardDetails = encryptedCardNumber + "," + encryptedCVV + "," + key;
+            byte[] data = creditCardDetails.getBytes();
+            DatagramPacket requestPacket = new DatagramPacket(data, data.length, udpServerAddress, UDP_SERVER_PORT);
+            udpSocket.send(requestPacket);
+            System.out.println("Sent encrypted credit card details and key to UDP server: " + creditCardDetails);
+
+            byte[] buffer = new byte[1024];
+            DatagramPacket responsePacket = new DatagramPacket(buffer, buffer.length);
+            udpSocket.receive(responsePacket);
+            String response = new String(responsePacket.getData(), 0, responsePacket.getLength());
+            System.out.println("Received response from UDP server: " + response);
+            return response.equalsIgnoreCase("true");
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+}
+
+
+For UDPServer.java : 
+
+import java.io.*;
+import java.net.*;
+import java.util.*;
+
+public class UDPServer {
+    private static final int SERVER_PORT = 9999;
+    private static final String CARD_DETAILS_FILE = "CcDatabase.txt";
+
+    public static void main(String[] args) {
+        try (DatagramSocket udpSocket = new DatagramSocket(SERVER_PORT)) {
+            System.out.println("UDP server is running on port " + SERVER_PORT);
+            while (true) {
+                byte[] buffer = new byte[1024];
+                DatagramPacket requestPacket = new DatagramPacket(buffer, buffer.length);
+                udpSocket.receive(requestPacket);
+                System.out.println("Received encrypted credit card details from TCP server");
+
+                String request = new String(requestPacket.getData(), 0, requestPacket.getLength());
+                System.out.println("Encrypted credit card details: " + request);
+
+                InetAddress clientAddress = requestPacket.getAddress();
+                int clientPort = requestPacket.getPort();
+
+                String[] parts = request.split(",");
+                if (parts.length != 3) {
+                    System.out.println("Invalid request format. Expected three parts: encrypted card number, encrypted CVV, and key.");
+                    sendResponse(udpSocket, clientAddress, clientPort, "false");
+                    continue;
+                }
+
+                String encryptedCardNumber = parts[0];
+                String encryptedCVV = parts[1];
+                int key;
+                try {
+                    key = Integer.parseInt(parts[2]);
+                } catch (NumberFormatException e) {
+                    System.out.println("Invalid key format. Expected an integer key.");
+                    sendResponse(udpSocket, clientAddress, clientPort, "false");
+                    continue;
+                }
+
+                String cardNumber = decrypt(encryptedCardNumber, key);
+                String cvv = decrypt(encryptedCVV, key);
+                System.out.println("Decrypted credit card details: Card Number=" + cardNumber + ", CVV=" + cvv);
+
+                boolean valid = validateCardDetails(cardNumber, cvv);
+
+                if (valid) {
+                    sendResponse(udpSocket, clientAddress, clientPort, "true");
+                    System.out.println("Credit card details valid. Sending true response.");
+                } else {
+                    sendResponse(udpSocket, clientAddress, clientPort, "false");
+                    System.out.println("Credit card details invalid. Sending false response.");
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static boolean validateCardDetails(String cardNumber, String cvv) {
+        try (BufferedReader br = new BufferedReader(new FileReader(CARD_DETAILS_FILE))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] parts = line.split(",");
+                if (parts.length != 2) continue;
+                String fileCardNumber = parts[0].trim();
+                String fileCVV = parts[1].trim();
+                if (fileCardNumber.equals(cardNumber) && fileCVV.equals(cvv)) {
+                    return true;
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    private static void sendResponse(DatagramSocket udpSocket, InetAddress clientAddress, int clientPort, String response) {
+        byte[] data = response.getBytes();
+        DatagramPacket responsePacket = new DatagramPacket(data, data.length, clientAddress, clientPort);
+        try {
+            udpSocket.send(responsePacket);
+            System.out.println("Sent response to TCP server: " + response);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static String decrypt(String encryptedInput, int key) {
+        StringBuilder decrypted = new StringBuilder();
+        for (char ch : encryptedInput.toCharArray()) {
+            if (Character.isDigit(ch)) {
+                int encryptedNum = ch - '0';
+                int decryptedNum = (encryptedNum - key + 10) % 10;
+                decrypted.append((char) ('0' + decryptedNum));
+            }
+        }
+        return decrypted.toString();
+    }
+}
+
+THANK YOU 
+Bhavesh Naidu Kulluru,
+bhavesh@kullurubhaveshnaidu.com.
+
+
