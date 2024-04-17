@@ -1,0 +1,7 @@
+1,Apples,10.50
+2,Oranges,15.00
+3,Bananas,7.25
+4,Grapes,20.00
+5,Strawberries,12.75
+6,Blueberries,10.50
+
