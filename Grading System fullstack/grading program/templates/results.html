@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Results</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Results</h1>
+        {% if data %}
+        <div class="response-box">
+            <p><strong>Student ID:</strong> {{ data[0] }}</p>
+            <p><strong>Score:</strong> {{ data[1] }}</p>
+            <p><strong>Grade:</strong> {{ data[2] }}</p>
+        </div>
+        <form action="/results" method="GET">
+            <input type="submit" value="Refresh">
+        </form>
+        {% else %}
+        <p>No results found for the provided student ID.</p>
+        {% endif %}
+        <form action="/results" method="POST">
+            <label for="student_id">Enter Student ID:</label><br>
+            <input type="text" id="student_id" name="student_id" placeholder="Enter Student ID" required><br>
+            <input type="submit" value="Get Results">
+        </form>
+    </div>
+</body>
+</html>
