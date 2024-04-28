@@ -1,0 +1,5 @@
+the whole file runs a python flask application
+the architecture is simple
+there is a front end ( index and results ) html files +css for styling
+there is a worker which does the processing
+and mysql is the database ( it has two tables students and grades)
