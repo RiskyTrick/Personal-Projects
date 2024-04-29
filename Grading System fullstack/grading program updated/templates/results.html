@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Results</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 80%;
+            margin: 20px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .response-box {
+            background-color: #f9f9f9;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .response-box p {
+            margin: 5px 0;
+        }
+        form {
+            text-align: center;
+        }
+        input[type="text"], input[type="submit"] {
+            padding: 10px;
+            margin: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        input[type="submit"] {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        input[type="submit"]:hover {
+            background-color: #45a049;
+        }
+        table {
+            margin: 0 auto; /* Center the table */
+        }
+        canvas {
+            display: block;
+            margin: 20px auto;
+        }
+    </style>
+    <!-- Include Chart.js library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Results</h1>
+        {% if data %}
+        <div class="response-box">
+            <p><strong>Student ID:</strong> {{ data[0] }}</p>
+            <p><strong>Score:</strong> {{ data[1] }}</p>
+            <p><strong>Grade:</strong> {{ data[2] }}</p>
+        </div>
+        <form action="/results" method="GET">
+            <input type="submit" value="Refresh">
+        </form>
+        <!-- Display statistics -->
+        <table>
+            <thead>
+                <tr>
+                    <th>Statistic</th>
+                    <th>Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Highest Score</td>
+                    <td>{{ highest }}</td>
+                </tr>
+                <tr>
+                    <td>Lowest Score</td>
+                    <td>{{ lowest }}</td>
+                </tr>
+                <tr>
+                    <td>Total Score</td>
+                    <td>{{ total_score }}</td>
+                </tr>
+                <tr>
+                    <td>Total Students</td>
+                    <td>{{ total_students }}</td>
+                </tr>
+                <tr>
+                    <td>Average Score</td>
+                    <td>{{ average_score }}</td>
+                </tr>
+            </tbody>
+        </table>
+        <!-- Display pie chart -->
+        <canvas id="gradeDistributionChart" width="400" height="400"></canvas>
+        <script>
+            // Get the pie chart canvas element
+            var ctx = document.getElementById('gradeDistributionChart').getContext('2d');
+            // Define data for the pie chart
+            var data = {
+                labels: ['A', 'B', 'C', 'D', 'F'],
+                datasets: [{
+                    data: [
+                        {{ grade_distribution['A'] }},
+                        {{ grade_distribution['B'] }},
+                        {{ grade_distribution['C'] }},
+                        {{ grade_distribution['D'] }},
+                        {{ grade_distribution['F'] }}
+                    ],
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.5)',
+                        'rgba(54, 162, 235, 0.5)',
+                        'rgba(255, 206, 86, 0.5)',
+                        'rgba(75, 192, 192, 0.5)',
+                        'rgba(153, 102, 255, 0.5)'
+                    ]
+                }]
+            };
+            // Create the pie chart
+            var myPieChart = new Chart(ctx, {
+                type: 'pie',
+                data: data
+            });
+        </script>
+        {% else %}
+        <p>No results found for the provided student ID.</p>
+        {% endif %}
+        <form action="/results" method="POST">
+            <label for="student_id">Enter Student ID:</label><br>
+            <input type="text" id="student_id" name="student_id" placeholder="Enter Student ID" required><br>
+            <input type="submit" value="Get Results">
+        </form>
+    </div>
+</body>
+</html>

@@ -1,0 +1,13 @@
+docker build -t grading-app .
+
+docker images
+
+docker run -d -p 5000:5000 grading-app
+
+docker run --name mysql-container -e MYSQL_ROOT_PASSWORD=skbn5359 -e MYSQL_DATABASE=exam_database -d mysql:latest
+
+docker run --name grading-app-container --link mysql-container:mysql -p 5000:5000 grading-app
+
+docker network create grading-network
+docker network connect grading-network mysql-container
+docker network connect grading-network grading-app-container
